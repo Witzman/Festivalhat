@@ -1,25 +1,21 @@
-
 #include <FastLED.h>
 
-// define your LED hardware setup here
+// define your LED hardware 
 #define CHIPSET     WS2801
-//#define LED_PIN     23
 #define DATA_PIN 10
 #define CLOCK_PIN 11
 #define COLOR_ORDER GRB
-// just in case you have dead pixels at the beginning
-// of your strip. If not it is just 0 (lucky you!).
 
-// set master brightness 0-255 here to adjust power consumption
-// and light intensity
+// adjust power consumption
 #define BRIGHTNESS  50
+
 // matrix size
 const uint8_t WIDTH  = 16;
 const uint8_t HEIGHT = 20;
 #define NUM_LEDS (WIDTH * HEIGHT)
 CRGB leds[NUM_LEDS];
 
-// MSGEQ7 wiring based on spectrum analyser shield
+// MSGEQ7 setup
 #define MSGEQ7_STROBE_PIN 4
 #define MSGEQ7_RESET_PIN  5
 #define AUDIO_LEFT_PIN    A0
@@ -36,20 +32,20 @@ static uint16_t scale;
 uint8_t noise[WIDTH][HEIGHT];
 
 void setup() {
-FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-
+// LED INIT
+  FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.setDither(0);
-  Serial.begin(38400);
-      Serial.print("setup start");
-        Serial.println(" ");
+  
+// MSGEQ7 INIT
   InitMSGEQ7();
+  
   //some point in the noise space to start with
   x = random16();
   y = random16();
   z = random16();
-        Serial.print("setup end");
-        Serial.println(" ");
+  
+  Serial.begin(38400);
 }
 
 // translates from x, y into an index into the LED array and
@@ -67,10 +63,6 @@ int XY(int x, int y) {
   if(x < 0) { 
     x = 0; 
   }
-  // for a serpentine layout reverse every 2nd row:
-  if(x % 2 == 1) {  
-    return (x * (WIDTH) + (HEIGHT - y -1)); 
-  } 
   else { 
     // use that line only, if you have all rows beginning at the same side
     return (x * (WIDTH) + y); 
