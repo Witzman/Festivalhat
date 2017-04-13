@@ -1,2 +1,2 @@
 # Festivalhat
-Sound Sensitive Festival Hat with MSGEQ/ &amp; WS2801
+Sound Sensitive Festival Hat with MSGEQ7 &amp; WS2801
