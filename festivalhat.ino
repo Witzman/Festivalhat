@@ -1,21 +1,25 @@
+
 #include <FastLED.h>
 
-// define your LED hardware 
+// define your LED hardware setup here
 #define CHIPSET     WS2801
+//#define LED_PIN     23
 #define DATA_PIN 10
 #define CLOCK_PIN 11
 #define COLOR_ORDER GRB
+// just in case you have dead pixels at the beginning
+// of your strip. If not it is just 0 (lucky you!).
 
-// adjust power consumption
-#define BRIGHTNESS  50
-
+// set master brightness 0-255 here to adjust power consumption
+// and light intensity
+#define BRIGHTNESS  20
 // matrix size
-const uint8_t WIDTH  = 16;
+const uint8_t WIDTH  = 17;
 const uint8_t HEIGHT = 20;
 #define NUM_LEDS (WIDTH * HEIGHT)
 CRGB leds[NUM_LEDS];
 
-// MSGEQ7 setup
+// MSGEQ7 wiring based on spectrum analyser shield
 #define MSGEQ7_STROBE_PIN 4
 #define MSGEQ7_RESET_PIN  5
 #define AUDIO_LEFT_PIN    A0
@@ -32,20 +36,20 @@ static uint16_t scale;
 uint8_t noise[WIDTH][HEIGHT];
 
 void setup() {
-// LED INIT
-  FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.setDither(0);
-  
-// MSGEQ7 INIT
+  Serial.begin(38400);
+      Serial.print("setup start");
+        Serial.println(" ");
   InitMSGEQ7();
-  
   //some point in the noise space to start with
   x = random16();
   y = random16();
   z = random16();
-  
-  Serial.begin(38400);
+        Serial.print("setup end");
+        Serial.println(" ");
 }
 
 // translates from x, y into an index into the LED array and
@@ -63,10 +67,9 @@ int XY(int x, int y) {
   if(x < 0) { 
     x = 0; 
   }
-  else { 
-    // use that line only, if you have all rows beginning at the same side
+
     return (x * (WIDTH) + y); 
-  }
+  
 }
 
 // Bresenham line algorythm 
@@ -160,7 +163,7 @@ void FillNoiseCentral() {
 }
 
 
-void FunkyNoise1() {
+void FunkyNoiseBeat() {
   ReadAudioMono();
   // zoom controlled by band 5 (snare)
   scale = left[5] / 4;
@@ -182,7 +185,7 @@ void FunkyNoise1() {
   ShowFrame();
 }
 
-void FunkyNoise2() {
+void FunkyNoisePump() {
   ReadAudioMono();
   // zoom factor set by inversed band 0 (63-0)
   // 3 added to avoid maximal zoom = plain color
@@ -215,16 +218,16 @@ void FunkyNoise2() {
   ShowFrame();
 }
 
-void FunkyNoise3() {
+void FunkyNoiseCirc() {
   ReadAudioMono();
   // fix zoom factor
-  scale = 50;
+  scale = 20;
   // move one step in the noise space when basedrum is present
   // = slowly change the pattern while the beat goes
   if (left[0] > 128) z=z+10;
   // x any y is defining the position in the noise space
-  x = left[3] / 3;
-  y = left[0] / 3;
+  x = left[3] / 2;
+  y = left[0] / 2;
   // calculate the noise array
   FillNoise();
   // map the noise
@@ -248,16 +251,16 @@ void FunkyNoise3() {
   ShowFrame();
 }
 
-void FunkyNoise4() {
+void FunkyNoiseFire() {
   ReadAudioMono();
   // fix zoom factor
-  scale = 50;
+  scale = 20;
   // position in the noise space depending on band 5
   // = change of the pattern
   z=left[5] / 2;
   // x scrolling through
   // = horizontal movement
-  x = x + 50;
+  x = x + 20;
   // y controlled by lowest band
   // = jumping of the pattern
   y = left[0];
@@ -284,16 +287,16 @@ void FunkyNoise4() {
   ShowFrame();
 }
 
-void FunkyNoise5() {
+void FunkyNoiseFill() {
   ReadAudioMono();
   // dynamic zoom: average of band 0 and 1
-  scale = 128-(left[0]+left[1])/4;
+  scale = 128-(left[0]+left[1])/2;
   // position in the noise space depending on x, y and z
   // z slowly scrolling
   z++;
   // x static
   // y scrolling 
-  y = y + 20;
+  y = y + 5;
   // calculate the noise array
   // x any y are this time defining THE CENTER 
   FillNoiseCentral();
@@ -317,34 +320,18 @@ void FunkyNoise5() {
   // show the result and count fps
   ShowFrame();
 }
-void colorWipe(uint32_t rc, uint32_t gc, uint32_t bc, uint8_t wait) {
- int i;
- FastLED.setBrightness(BRIGHTNESS);
-    for(int i = 0; i < NUM_LEDS; i++) {
-      //leds[i].setHSV(c, 200, 200);
-      leds[i] = CRGB( rc, gc, bc);
-      delay(wait);
-      FastLED.show();
-    }
-    
-}
+
 
 void loop() {
+ for(int i = 0; i < 250; i++) FunkyNoiseFill();
+ for(int i = 0; i < 250; i++) FunkyNoiseBeat();    
+ for(int i = 0; i < 250; i++) FunkyNoiseCirc(); 
+ for(int i = 0; i < 250; i++) FunkyNoisePump();
+ for(int i = 0; i < 250; i++) FunkyNoiseFire();
 
- for(int i = 0; i < 500; i++) FunkyNoise1();
-     
- for(int i = 0; i < 500; i++) FunkyNoise2();
-
-  for(int i = 0; i < 500; i++) FunkyNoise3();
-
-  for(int i = 0; i < 500; i++) FunkyNoise4();
-
-  for(int i = 0; i < 500; i++) FunkyNoise5();
         Serial.print("programm end");
         Serial.println(" ");
 
-//colorWipe(100,100,100,5);
-//colorWipe(0,0,0,5);
 }
 
 
