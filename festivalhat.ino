@@ -1,4 +1,3 @@
-
 #include <FastLED.h>
 
 // define your LED hardware setup here
@@ -323,16 +322,15 @@ void FunkyNoiseFill() {
 
 
 void loop() {
- for(int i = 0; i < 250; i++) FunkyNoiseFill();
- for(int i = 0; i < 250; i++) FunkyNoiseBeat();    
- for(int i = 0; i < 250; i++) FunkyNoiseCirc(); 
- for(int i = 0; i < 250; i++) FunkyNoisePump();
- for(int i = 0; i < 250; i++) FunkyNoiseFire();
+// for(int i = 0; i < 250; i++) FunkyNoiseFill();   //Not so GOOOD
+ for(int i = 0; i < 250; i++) FunkyNoiseBeat();    //PUMPING GOOOOOOOOOD
+// for(int i = 0; i < 250; i++) FunkyNoiseCirc();     // NOT SO FINE
+ for(int i = 0; i < 250; i++) FunkyNoisePump();     //PUMPING GOOOOOOOOOD
+// for(int i = 0; i < 250; i++) FunkyNoiseFire();     //FIRE OK
 
         Serial.print("programm end");
         Serial.println(" ");
 
 }
-
 
 
